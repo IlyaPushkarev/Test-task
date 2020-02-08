@@ -1,0 +1,16 @@
+body{
+	margin: 0;
+	padding: 0;
+	height: 100%;
+}
+
+canvas{
+	display: block;
+	width: 100%;
+	height: 100%;
+}
+
+input,span{
+	margin-top: 20px;
+	display: block;
+}
