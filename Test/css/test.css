@@ -14,3 +14,12 @@ input,span{
 	margin-top: 20px;
 	display: block;
 }
+
+.container{
+	position: absolute;
+
+	top:0;
+	left: 0;
+
+	background: white;
+}

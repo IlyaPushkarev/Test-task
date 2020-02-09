@@ -1,161 +1,134 @@
-(function(){
-	
-let output1 = document.getElementById('quantity')
-console.log(output1.value)
+let width = window.innerWidth;
+let height = window.innerHeight;
+let middlePositionX=0;
 
-let quantity=output1.value;
-
-output1.addEventListener("change", ()=>{
-	console.log(output1.value)
-	quantity = output1.value;
-
-	create(output1.value)
-})
-
-create(output1.value);
-
-function create(quantityValue){
-	
-var width = window.innerWidth;
-var height = window.innerHeight;
-var canvas = document.getElementById('canvas');
-var gui = new dat.GUI();
-
+const canvas = document.getElementById('canvas');
 canvas.setAttribute('width', width);
 canvas.setAttribute('height', height);
 
 const renderer = new THREE.WebGLRenderer({canvas});
 
-const fov = 75;
-const aspect = 2;  // the canvas default
-const near = 0.1;
-const far = 1000;
-const camera = new THREE.PerspectiveCamera(fov, width/height, near, far);
-camera.position.set(0, 0, 6);
+let fov = 75;
+ let aspect = width/height;  
+let near = 1.5;
+let far = 1000;
+const camera = new THREE.PerspectiveCamera(fov, aspect , near, far);
 
-// camera.up.set(0, 0, 1);
-camera.lookAt(0, 0, 0);
+camera.position.set(-2, -2, 1);;
+
+const controls = new THREE.OrbitControls(camera, canvas);
+controls.target.set(0, 0, 5);
+controls.update();
 
 const scene = new THREE.Scene();
 
-const cube_width = 0.1;
-const cube_height = 0.1;
-const cube_depth = 0.1;
-const geometry = new THREE.BoxBufferGeometry(cube_width, cube_height, cube_depth);
-
-
- const material = new THREE.MeshBasicMaterial( );
-
-
-const cube = new THREE.Mesh(geometry, material);
-
 const group = new THREE.Object3D();
 
-// let quantity= 20;
-let leftDirection=0;
-let rightDirection=0;
-let topDirection = 2;
+function render() {
+		renderer.render(scene, camera);
 
-for(let column = 0; column < quantity; column++){
-	
-	const cube = new THREE.Mesh(geometry, material);
-	
-		cube.position.x += rightDirection*geometry.parameters.width/2;
-		
-		rightDirection +=3;
-		group.add(cube);
-	
+		requestAnimationFrame(render);
+	}
+
+	requestAnimationFrame(render);
+
+function randomColor(){
+	let colors = [0x808080,0x008000,0x00FF00,0x800000,0xFF0000,0x804000,0xFF8000,0x808000,0xFFFF00,0x000080,0x0000FF,0x800080,0xFF00FF,0x004080,0xF04080,0x0080FF,0x008080,0x00FFFF,0xD0D0D0];
+	return colors[Math.floor(Math.random()*(colors.length))];
 }
 
+function createTriangle(amount, width=0.1, height=0.1, depth=0.1){
+	const geometry = new THREE.BoxBufferGeometry(width, height, depth);
+	
+	let quantity = amount;
+	let rightDirection=0;
+
+	for(let column = 0; column < quantity; column++){
+
+		const material = new THREE.MeshBasicMaterial({color: randomColor()});
+		const cube = new THREE.Mesh(geometry, material);
+
+		cube.position.x += rightDirection*geometry.parameters.width/2;
+
+		rightDirection +=3;
+
+		group.add(cube);
+	}
+
 	let k =3;
-	let shift = 1;
 	let startForThisRow;
-	let firstStep = geometry.parameters.width/4;
 	let stepRight = geometry.parameters.width/4;
 
 	for(let row = 1; row < quantity; row++){
-		
 
 		for(let column = 0; column < quantity-row; column++){
-				
+
+			const material = new THREE.MeshBasicMaterial({color: randomColor()});
 			const cube = new THREE.Mesh(geometry, material);
-				
-				if(column==0){
-					cube.position.x = k*geometry.parameters.width/4;
-					startForThisRow = k*geometry.parameters.width/4;
-					stepRight = startForThisRow + 6*geometry.parameters.width/4;
-				}else{
-					cube.position.x = stepRight;
-					stepRight +=6*geometry.parameters.width/4
-				}
-				
-				cube.position.y = row*geometry.parameters.height;
+
+			if(column==0){
+				cube.position.x = k*geometry.parameters.width/4;
+				startForThisRow = k*geometry.parameters.width/4;
+				stepRight = startForThisRow + 6*geometry.parameters.width/4;
+			}else{
+				cube.position.x = stepRight;
+				stepRight +=6*geometry.parameters.width/4
+			}
+
+			cube.position.y = row*geometry.parameters.height;
 
 			group.add(cube);
 		}
 		k+=3;			
 	}
-	
-scene.add(group);
-
-function resizeRendererToDisplaySize(renderer) {
-	const canvas = renderer.domElement;
-	const width = canvas.clientWidth;
-	const height = canvas.clientHeight;
-	const needResize = canvas.width !== width || canvas.height !== height;
-	if (needResize) {
-		renderer.setSize(width, height, false);
+	if(quantity==1){
+	camera.position.set(0, 0, 2);
+	controls.target.set(0, 0, 1 );
+	controls.update();
+	}else{
+		middlePositionX = (quantity==1)? 0 : Math.ceil(quantity/2);
+	camera.position.set(group.children[middlePositionX].position.x, (group.children[middlePositionX].position.y+1) * middlePositionX/2, 2);
+	controls.target.set(group.children[middlePositionX].position.x, (group.children[middlePositionX].position.y+1) * middlePositionX/2, 0 );
+	controls.update();
 	}
-	return needResize;
-}
+	
 
-function render() {
-	renderer.render(scene, camera);
+	scene.add(group);
+
+	function render() {
+		renderer.render(scene, camera);
+
+		requestAnimationFrame(render);
+	}
 
 	requestAnimationFrame(render);
 }
 
-requestAnimationFrame(render);
+let number = document.getElementById('quantity');
+let outputQuantity = document.getElementById('outputQuantity');
 
-class AxisGridHelper {
-	constructor(node, units = 10) {
-		const axes = new THREE.AxesHelper();
-		axes.material.depthTest = false;
-      axes.renderOrder = 2;  // after the grid
-      node.add(axes);
+number.addEventListener("change", function(){
+	outputQuantity.innerText = "Количество снизу=" +`${number.value}`;
 
-      const grid = new THREE.GridHelper(units, units);
-      grid.material.depthTest = false;
-      grid.renderOrder = 1;
-      node.add(grid);
+	group.children.length=0;
 
-      this.grid = grid;
-      this.axes = axes;
-      this.visible = true;
-  }
-  get visible() {
-  	return this._visible;
-  }
-  set visible(v) {
-  	this._visible = v;
-  	this.grid.visible = v;
-  	this.axes.visible = v;
-  }
-}
+	if(+number.value!==0){
+		createTriangle(+number.value, +size.value, +size.value, +size.value);
+	}
+});
 
-function makeAxisGrid(node, label, units) {
-	const helper = new AxisGridHelper(node, units);
-	gui.add(helper, 'visible').name(label);
-}
+let size = document.getElementById('size');
+let outputSize= document.getElementById('outputSize');
 
-makeAxisGrid(group, 'Cube', 10);
+size.addEventListener("change", function () {
+	outputSize.innerText = "Размер=" + `${(this.value*100).toFixed(0)}`
+	
+	let param = +this.value;
 
-const controls = new THREE.OrbitControls(camera, canvas);
-controls.target.set(0, 0, 1);
-controls.update();
+	group.children.length=0;
 
-}
+	if(+number.value!==0){
+		createTriangle(+number.value, +size.value, +size.value, +size.value);
+	}
+})
 
-
-
-})()
