@@ -87,8 +87,8 @@ function createTriangle(amount, width=0.1, height=0.1, depth=0.1){
 	controls.update();
 	}else{
 		middlePositionX = (quantity==1)? 0 : Math.ceil(quantity/2);
-	camera.position.set(group.children[middlePositionX].position.x, (group.children[middlePositionX].position.y+1) * middlePositionX/2, 2);
-	controls.target.set(group.children[middlePositionX].position.x, (group.children[middlePositionX].position.y+1) * middlePositionX/2, 0 );
+	camera.position.set(group.children[middlePositionX].position.x, (group.children[middlePositionX].position.y+1) * middlePositionX/4, 2);
+	controls.target.set(group.children[middlePositionX].position.x, (group.children[middlePositionX].position.y+1) * middlePositionX/4, 0 );
 	controls.update();
 	}
 	
